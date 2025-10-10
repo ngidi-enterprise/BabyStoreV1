@@ -1,0 +1,72 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Checkout — SnuggleUp</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main style="max-width:760px;margin:28px auto;padding:18px;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.06)">
+  <h1>Checkout</h1>
+  <div id="checkout-summary">
+    <h3>Order summary</h3>
+    <ul id="checkout-items" style="list-style:none;padding:0;margin:0"></ul>
+    <div style="font-weight:800;margin-top:8px">Total: <span id="checkout-total">R0</span></div>
+  </div>
+
+  <form id="checkout-form" style="margin-top:14px">
+    <label style="display:block;margin-top:8px">Full name:<br/><input id="payer-name" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #eee"/></label>
+    <label style="display:block;margin-top:8px">Email:<br/><input id="payer-email" type="email" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #eee"/></label>
+    <label style="display:block;margin-top:8px">Address:<br/><textarea id="payer-address" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #eee"></textarea></label>
+    <label style="display:block;margin-top:8px">Payment method:<br/>
+      <select id="payer-method" required style="width:100%;padding:8px;border-radius:6px;border:1px solid #eee">
+        <option value="card">Secure Card Payments (Visa / MasterCard)</option>
+        <option value="payfast">PayFast</option>
+      </select>
+    </label>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button type="submit" style="background:var(--orange);color:#fff;padding:10px 14px;border-radius:8px;border:none;cursor:pointer">Confirm Order</button>
+      <button type="button" onclick="history.back()" style="padding:10px 14px;border-radius:8px;border:1px solid #eee;background:#fff">Cancel</button>
+    </div>
+  </form>
+</main>
+
+<script>
+// Render cart items from sessionStorage
+function checkout_renderFromSession() {
+  const raw = sessionStorage.getItem('snug_cart');
+  let items = raw ? JSON.parse(raw) : [];
+  const list = document.getElementById('checkout-items');
+  list.innerHTML = '';
+  let total = 0;
+  items.forEach(it => {
+    const li = document.createElement('li');
+    li.style.display='flex'; li.style.gap='12px'; li.style.alignItems='center'; li.style.padding='10px 0'; li.style.borderBottom='1px solid #f1f1f1';
+    li.innerHTML = `<img src="${it.img}" style="width:64px;height:48px;object-fit:cover;border-radius:6px" alt="${it.name}" /><div style="flex:1"><strong>${it.name}</strong><div class="small">R${it.price} × ${it.qty || 1}</div></div><div>R${it.price * (it.qty || 1)}</div>`;
+    list.appendChild(li);
+    total += it.price * (it.qty || 1);
+  });
+  document.getElementById('checkout-total').textContent = 'R' + total;
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  checkout_renderFromSession();
+  document.getElementById('checkout-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('payer-name').value.trim();
+    const email = document.getElementById('payer-email').value.trim();
+    if (!name || !email) { alert('Please enter your name and email'); return; }
+    const raw = sessionStorage.getItem('snug_cart');
+    const items = raw ? JSON.parse(raw) : [];
+    const total = items.reduce((s,i)=>s + i.price * (i.qty || 1), 0);
+    const order = { id: 'SNUG' + Math.floor(Math.random()*900000+100000), items, total, name, email, date:new Date().toISOString() };
+    sessionStorage.setItem('snug_order', JSON.stringify(order));
+    sessionStorage.removeItem('snug_cart');
+    // redirect to thankyou
+    window.location.href = './thankyou.html';
+  });
+});
+</script>
+</body>
+</html>

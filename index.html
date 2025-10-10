@@ -1,0 +1,283 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SnuggleUp — Baby Essentials</title>
+<meta name="description" content="SnuggleUp — trusted baby essentials delivered fast.">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header role="banner">
+    <div class="brand">
+      <img src="logo.png" alt="SnuggleUp logo" />
+      <div>
+        <div class="title">SnuggleUp</div>
+        <div class="tag">Baby essentials for modern parents</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="search" role="search" aria-label="Search products">
+        <label class="visually-hidden" for="search-input">Search products</label>
+        <input id="search-input" placeholder="Search nappies, bottles, pumps..." aria-label="Search products" />
+        <button id="search-btn" aria-label="Search">🔍</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="hero-heading">
+    <h1 id="hero-heading">Everything your little one needs — delivered fast</h1>
+    <p style="color:var(--muted);max-width:760px;margin:8px auto">Curated essentials selected for comfort, safety and convenience. Special offers for first-time parents. Free local delivery over R800.</p>
+    <button class="cta" onclick="document.getElementById('shop-area').scrollIntoView({behavior:'smooth'})">Shop baby essentials</button>
+  </section>
+
+  <main class="container" id="shop-area">
+    <section aria-labelledby="top-picks-title">
+      <div class="section-title">
+        <h2 id="top-picks-title">Top Picks for New Parents</h2>
+        <div class="small">Trusted and loved</div>
+      </div>
+      <div class="product-grid" id="products-grid"></div>
+    </section>
+
+    <section style="margin-top:22px;">
+      <div class="section-title">
+        <h2>Top Picks for Newborns</h2>
+        <div class="small">Perfect first essentials</div>
+      </div>
+      <div class="card featured" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px">
+        <div style="flex:1"><img src="bottle_steriliser.jpg" alt="Bottle Warmer & Sterilizer" /></div>
+        <div style="flex:2;padding:12px">
+          <h3>Bottle Warmer & Sterilizer</h3>
+          <p class="small" style="color:var(--muted)">Fast warming and sterilising for peace of mind. R399</p>
+          <button class="add" onclick="addToCartById(1)">Buy now - R399</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="new-arrivals" aria-labelledby="new-arrivals">
+      <h2 id="new-arrivals">✨ New Arrivals — Just In for Your Little One!</h2>
+      <div class="product-grid" id="new-arrivals-grid" style="margin-top:12px;"></div>
+    </section>
+  </main>
+
+  <button class="cart-button" onclick="openCart()">Checkout <span class="cart-count" id="cart-count">0</span></button>
+
+  <div class="modal" id="cart-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="panel" role="document" aria-labelledby="cart-title">
+      <div class="header" style="padding:12px;border-bottom:1px solid rgba(0,0,0,0.04);display:flex;justify-content:space-between;align-items:center;">
+        <strong id="cart-title">Your cart</strong>
+        <div><button onclick="closeCart()">Close</button></div>
+      </div>
+      <div class="content" id="cart-content" style="padding:16px"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="muted">© 2025 SnuggleUp</div>
+    <div class="muted" style="margin-top:6px">Made with ❤️ for all parents. Free local delivery over R800.</div>
+    <div style="margin-top:10px;color:var(--muted);font-size:13px">Contact: support@snuggleup.co.za | +27 (0)10 123 4567</div>
+  </footer>
+
+<script>
+// Product data
+const PRODUCTS = [
+  { id:1, name:'Bottle Warmer & Sterilizer', price:399, img:'bottle_steriliser.jpg', desc:'Fast warming & sterilising for peace of mind.' },
+  { id:2, name:'Automatic Double Breast Pump', price:299, img:'double_pump.jpg', desc:'Gentle, efficient double pumping.' },
+  { id:3, name:'Baby Walker', price:799, img:'baby_walker.jpg', desc:'Safe walker for curious babies.' }
+];
+
+const NEW_ARRIVALS = [
+  { id:101, name:'Baby Bath Set', price:249, img:'bottle_steriliser.jpg' },
+  { id:102, name:'Cotton Swaddle Blanket', price:279, img:'double_pump.jpg' },
+  { id:103, name:'Teething Toy Set', price:199, img:'baby_walker.jpg' }
+];
+
+let cart = [];
+
+// Render functions
+function renderProducts(list = PRODUCTS) {
+  const grid = document.getElementById('products-grid');
+  grid.innerHTML = '';
+  list.forEach(p => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${p.img}" alt="${p.name}" />
+      <div class="body">
+        <h3>${p.name}</h3>
+        <div class="small" style="color:var(--muted)">${p.desc || ''}</div>
+        <div class="price">R${p.price}</div>
+        <button class="add" onclick="addToCartById(${p.id})">Add to Cart</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderNewArrivals() {
+  const ga = document.getElementById('new-arrivals-grid');
+  ga.innerHTML = '';
+  NEW_ARRIVALS.forEach(n => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${n.img}" alt="${n.name}" />
+      <div class="body">
+        <h3>${n.name}</h3>
+        <div class="small">From R${n.price}</div>
+        <button class="add" onclick="addToCart('${n.name}', ${n.price})">Add to Cart</button>
+      </div>
+    `;
+    ga.appendChild(card);
+  });
+}
+
+// Cart functions (with thumbnail, qty controls)
+function addToCart(name, price, img) {
+  // add simple item (used by new arrivals)
+  const id = 'p_' + Math.random().toString(36).slice(2,8);
+  cart.push({ id, name, price, img: img || '', qty: 1 });
+  updateCartCount();
+  animateCartButton();
+}
+
+function addToCartById(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  const existing = cart.find(i => i.name === p.name);
+  if (existing) { existing.qty += 1; }
+  else { cart.push({ id: p.id, name: p.name, price: p.price, img: p.img, qty: 1 }); }
+  updateCartCount();
+  animateCartButton();
+}
+
+function updateCartCount() {
+  const totalQty = cart.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('cart-count').textContent = totalQty;
+}
+
+function animateCartButton() {
+  const btn = document.querySelector('.cart-button');
+  btn.style.transform = 'scale(1.06)';
+  setTimeout(()=>btn.style.transform = 'scale(1)',220);
+}
+
+function openCart() {
+  const modal = document.getElementById('cart-modal');
+  const content = document.getElementById('cart-content');
+  content.innerHTML = '';
+  if (cart.length === 0) {
+    content.innerHTML = '<p>Your cart is empty.</p><div style="margin-top:12px;"><button onclick="closeCart()">Close</button></div>';
+  } else {
+    let html = '<ul class="cart-list">';
+    cart.forEach((it, idx) => {
+      html += `<li class="cart-item" data-idx="${idx}">
+        <img src="${it.img}" class="thumb" alt="${it.name}" />
+        <div style="flex:1"><strong>${it.name}</strong><div class="small">R${it.price}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div class="qty-controls"><button onclick="changeQty(${idx}, -1)" aria-label="Decrease">−</button><span id="qty-${idx}">${it.qty}</span><button onclick="changeQty(${idx}, 1)" aria-label="Increase">+</button></div>
+          <button class="remove-btn" onclick="removeItem(${idx})">Remove</button>
+        </div>
+      </li>`;
+    });
+    html += '</ul>';
+    const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    html += `<div style="margin-top:12px;display:flex;justify-content:space-between;font-weight:700">Total <span>R${total}</span></div>`;
+    html += `<div style="margin-top:12px;display:flex;gap:8px;"><button onclick="closeCart()">Continue shopping</button><button onclick="goToCheckout()">Checkout</button></div>`;
+    content.innerHTML = html;
+  }
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden','false');
+}
+
+function closeCart() {
+  const modal = document.getElementById('cart-modal');
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden','true');
+}
+
+function changeQty(idx, delta) {
+  if (!cart[idx]) return;
+  cart[idx].qty += delta;
+  if (cart[idx].qty <= 0) {
+    cart.splice(idx,1);
+  }
+  updateCartCount();
+  openCart(); // re-render modal to update UI
+}
+
+function removeItem(idx) {
+  if (!cart[idx]) return;
+  cart.splice(idx,1);
+  updateCartCount();
+  openCart();
+}
+
+function goToCheckout() {
+  // persist cart in sessionStorage and navigate to checkout page
+  sessionStorage.setItem('snug_cart', JSON.stringify(cart));
+  // navigate to checkout file in same folder
+  window.location.href = './checkout.html';
+}
+
+// Search functionality (live + button)
+function filterProducts() {
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  if (!q) { renderProducts(); return; }
+  const matches = PRODUCTS.filter(p => p.name.toLowerCase().includes(q) || (p.desc && p.desc.toLowerCase().includes(q)));
+  // also include new arrivals matches
+  const naMatches = NEW_ARRIVALS.filter(n => n.name.toLowerCase().includes(q));
+  // combine and show
+  renderProducts(matches.concat()); // show main matches
+  // optionally show new arrivals matches at bottom of results
+  const naGrid = document.getElementById('new-arrivals-grid');
+  naGrid.innerHTML = '';
+  naMatches.forEach(n => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `<img src="${n.img}" alt="${n.name}" /><div class="body"><h3>${n.name}</h3><div class="small">From R${n.price}</div><button class="add" onclick="addToCart('${n.name}', ${n.price}, '${n.img}')">Add to Cart</button></div>`;
+    naGrid.appendChild(card);
+  });
+}
+
+// helpers for checkout page rendering
+function checkout_renderFromSession() {
+  const raw = sessionStorage.getItem('snug_cart');
+  let items = raw ? JSON.parse(raw) : [];
+  const list = document.getElementById('checkout-items');
+  if (!list) return;
+  list.innerHTML = '';
+  let total = 0;
+  items.forEach(it => {
+    const li = document.createElement('li');
+    li.style.display='flex'; li.style.gap='12px'; li.style.alignItems='center';
+    li.innerHTML = `<img src="${it.img}" style="width:64px;height:48px;object-fit:cover;border-radius:6px" alt="${it.name}" /><div style="flex:1">${it.name} — R${it.price}</div>`;
+    list.appendChild(li);
+    total += it.price * (it.qty || 1);
+  });
+  const totalEl = document.getElementById('checkout-total');
+  if (totalEl) totalEl.textContent = 'R' + total;
+}
+
+// init
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderProducts();
+  renderNewArrivals();
+  updateCartCount();
+  // wire search button
+  document.getElementById('search-btn').addEventListener('click', filterProducts);
+  // allow Enter key inside search input to trigger search
+  document.getElementById('search-input').addEventListener('keydown', function(e){ if(e.key === 'Enter') { e.preventDefault(); filterProducts(); } });
+  // show splash only on mobile (non-intrusive)
+  if (!localStorage.getItem('snug_seen') && /Mobi|Android/i.test(navigator.userAgent)) {
+    // no-op splash in this build; kept for future use
+    localStorage.setItem('snug_seen','1');
+  }
+});
+</script>
+</body>
+</html>

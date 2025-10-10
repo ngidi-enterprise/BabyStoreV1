@@ -1,0 +1,26 @@
+
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Thank you — SnuggleUp</title><link rel="stylesheet" href="styles.css"></head>
+<body style="background:#fffafc;padding:28px">
+  <main style="max-width:760px;margin:0 auto;background:#fff;padding:18px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.06)">
+    <div id="thankyou-content"><h2>Order confirmation</h2><p>If you see this page without details, please return to the shop.</p></div>
+    <div style="margin-top:12px"><a href="index.html">Return to shop</a></div>
+  </main>
+<script>
+function thankyou_render() {
+  const raw = sessionStorage.getItem('snug_order');
+  if (!raw) return;
+  const order = JSON.parse(raw);
+  const el = document.getElementById('thankyou-content');
+  el.innerHTML = `<h2>Thank you — Order received!</h2>
+    <p>Order ID: <strong>${order.id}</strong></p>
+    <p>Name: ${order.name}</p>
+    <p>Total: R${order.total}</p>
+    <ul>${order.items.map(i=>'<li>'+i.name+' — R'+i.price+' × '+(i.qty||1)+'</li>').join('')}</ul>
+    <p style="color:#6b7280">A confirmation email would be sent in a real checkout flow.</p>`;
+}
+document.addEventListener('DOMContentLoaded', thankyou_render);
+</script>
+</body>
+</html>
