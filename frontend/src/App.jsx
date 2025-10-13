@@ -1,11 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
+import CheckoutSuccess from './CheckoutSuccess';
+import CheckoutCancel from './CheckoutCancel';
 
 function App() {
   const [cartCount, setCartCount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState('home');
+
+  // Check URL for routing
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.includes('/checkout/success')) {
+      setCurrentPage('success');
+    } else if (path.includes('/checkout/cancel')) {
+      setCurrentPage('cancel');
+    } else {
+      setCurrentPage('home');
+    }
+  }, []);
+
+  // Render different pages based on route
+  if (currentPage === 'success') {
+    return <CheckoutSuccess />;
+  }
+
+  if (currentPage === 'cancel') {
+    return <CheckoutCancel />;
+  }
 
   // Product data with real images
   const products = {
@@ -127,7 +151,10 @@ function App() {
 
   const handleCheckout = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/payments/create', {
+      // Save cart to localStorage for recovery if payment fails
+      localStorage.setItem('cart', JSON.stringify(cartItems));
+      
+      const response = await fetch('https://snuggleup-backend.onrender.com/api/payments/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -142,6 +169,9 @@ function App() {
       const paymentData = await response.json();
       
       if (paymentData.paymentUrl) {
+        // Save order ID for reference
+        localStorage.setItem('lastOrderId', paymentData.orderId);
+        
         // Redirect to PayFast payment page
         window.location.href = paymentData.paymentUrl;
       } else {
