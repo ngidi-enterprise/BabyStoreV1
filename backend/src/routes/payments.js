@@ -20,8 +20,8 @@ router.post('/create', async (req, res) => {
       item_description: `Baby essentials order with ${orderItems.length} items`,
       email_address: email,
       m_payment_id: orderId,
-      return_url: 'https://snuggleup-backend.onrender.com/success',
-      cancel_url: 'https://snuggleup-backend.onrender.com/cancel',
+      return_url: 'https://snuggleup-backend.onrender.com/api/payments/success',
+      cancel_url: 'https://snuggleup-backend.onrender.com/api/payments/cancel',
       notify_url: 'https://snuggleup-backend.onrender.com/api/payments/notify',
     };
 
