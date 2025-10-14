@@ -153,7 +153,7 @@ function App() {
     try {
       // Save cart to localStorage for recovery if payment fails
       localStorage.setItem('cart', JSON.stringify(cartItems));
-      
+
       const response = await fetch('https://snuggleup-backend.onrender.com/api/payments/create', {
         method: 'POST',
         headers: {
@@ -165,17 +165,16 @@ function App() {
           orderItems: cartItems
         })
       });
-      
-      const paymentData = await response.json();
-      
-      if (paymentData.paymentUrl) {
-        // Save order ID for reference
-        localStorage.setItem('lastOrderId', paymentData.orderId);
-        
-        // Redirect to PayFast payment page
-        window.location.href = paymentData.paymentUrl;
+
+      const html = await response.text();
+      // Open the PayFast form in a new tab and auto-submit
+      const payfastWindow = window.open('', '_blank');
+      if (payfastWindow) {
+        payfastWindow.document.open();
+        payfastWindow.document.write(html);
+        payfastWindow.document.close();
       } else {
-        alert('Payment setup failed. Please try again.');
+        alert('Popup blocked! Please allow popups for this site to proceed to payment.');
       }
     } catch (error) {
       console.error('Checkout error:', error);
